@@ -59,6 +59,7 @@ exports.getSubscriptions = (req, res) => {
         success: true,
         data: data,
         email: req.user.email,
+        name: req.user.name,
         lastLoggedInAt: req.user.lastLoggedInAt,
         role: req.user.role,
       });

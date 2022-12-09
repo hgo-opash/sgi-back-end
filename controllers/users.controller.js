@@ -66,7 +66,7 @@ exports.fblogin = (req, res) => {
       );
 
       Users.findById(user._id).then((val) => {
-        res.send({
+        res.status(200).send({
           success: true,
           token: token,
           lastlogin: val.lastLoggedInAt,
@@ -156,11 +156,13 @@ exports.loginUser = (req, res) => {
           } else if (!isMatch) {
             res.send({ success: false, message: "Invalid Email or Password" });
           } else {
+            console.log("sadsa ====>  ", user);
             const token = jwt.sign(
               {
                 email: email,
                 id: user._id.valueOf(),
                 lastLoggedInAt: new Date(),
+                name: user.firstName,
                 role: user.role,
               },
               process.env.JWT_SECRET_KEY,
@@ -170,9 +172,10 @@ exports.loginUser = (req, res) => {
             );
 
             Users.findById(user._id).then((val) => {
-              res.send({
+              res.status(200).send({
                 success: true,
                 token: token,
+                name: user.firstName,
                 lastlogin: val.lastLoggedInAt,
                 role: val.role,
               });
