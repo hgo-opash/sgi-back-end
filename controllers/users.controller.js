@@ -192,7 +192,9 @@ exports.loginUser = (req, res) => {
           .send({ success: false, message: "Invalid email or password" });
       }
     } else {
-      res.status(500).send({ success: false, message: error.message });
+      res
+        .status(500)
+        .send({ success: false, message: "User not found.Please Signup!!" });
     }
   });
 };

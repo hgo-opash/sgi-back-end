@@ -6,7 +6,7 @@ var Companies = Schema(
     name: { type: String, required: true },
     companyType: {
       type: String,
-      enum: ["IT", "Banking", "Streaming", "Beauty & Fashion"],
+      // enum: ["IT", "Banking", "Streaming", "Beauty & Fashion"],
       required: true,
     },
     description: { type: String, required: true },

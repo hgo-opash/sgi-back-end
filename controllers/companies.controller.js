@@ -11,6 +11,7 @@ exports.saveCompany = (req, res) => {
     price,
     description,
     popular,
+    status,
   } = req.body;
 
   const company_details = new Company({

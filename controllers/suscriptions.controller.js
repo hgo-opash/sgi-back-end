@@ -18,6 +18,7 @@ exports.saveSubscriptionService = (req, res) => {
     customizedAlertMessage,
     isEnableAlerts,
     // userId,
+    status,
   } = req.body;
 
   const sub_details = new Subscriptions({
@@ -34,9 +35,8 @@ exports.saveSubscriptionService = (req, res) => {
     customizedAlertMessage: customizedAlertMessage || "",
     isEnableAlerts: isEnableAlerts || false,
     userId: req.user.id,
+    status: status,
   });
-
-  console.log(sub_details);
 
   sub_details
     .save()
