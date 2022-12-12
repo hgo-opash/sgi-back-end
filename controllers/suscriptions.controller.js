@@ -52,7 +52,6 @@ exports.saveSubscriptionService = (req, res) => {
 };
 
 exports.getSubscriptions = (req, res) => {
-  console.log("user ====> ", req.user);
   Subscriptions.find({ userId: req.user.id })
     .then((data) => {
       res.status(200).send({
@@ -96,11 +95,6 @@ exports.editSubscription = (req, res) => {
 };
 
 exports.deleteSubscription = (req, res) => {
-  console.log(req.body);
-  // Subscriptions.find({ id: req.body.id }).then((data) => {
-  //   console.log(data);
-  //   res.send(data);
-  // });
   Subscriptions.findByIdAndDelete(req.body.id)
     .then((data) => {
       res.status(200).send({

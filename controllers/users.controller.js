@@ -31,8 +31,6 @@ exports.registerUser = (req, res) => {
     role: role,
   });
 
-  console.log(user_details);
-
   user_details
     .save()
     .then((data) => {
@@ -81,13 +79,11 @@ exports.fblogin = (req, res) => {
           `https://graph.facebook.com/oauth/access_token?client_id=1490110678165861&client_secret=7ed156d2f1a85aa55f3720f4e82fe56b&grant_type=client_credentials`
         )
         .then(({ data }) => {
-          // console.log({ accessToken: data });
           axios
             .get(
               `http://graph.facebook.com/debug_token?input_token=${accessToken}&access_token=${data?.access_token}`
             )
             .then(({ data }) => {
-              // console.log({ debug: data.data });
               if (req.body.userID === data.data.user_id) {
                 const fullName = name.split(" ");
                 const user_details = new Users({
@@ -102,8 +98,6 @@ exports.fblogin = (req, res) => {
                 user_details
                   .save()
                   .then((data) => {
-                    console.log("user ---> ", data);
-
                     const token = jwt.sign(
                       {
                         email: email,
@@ -152,11 +146,14 @@ exports.loginUser = (req, res) => {
       if (user) {
         user.comparePassword(password, (matchError, isMatch) => {
           if (matchError) {
-            res.send({ success: false, message: "Invalid Email or password" });
+            res
+              .status(401)
+              .send({ success: false, message: "Invalid Email or password" });
           } else if (!isMatch) {
-            res.send({ success: false, message: "Invalid Email or Password" });
+            res
+              .status(401)
+              .send({ success: false, message: "Invalid Email or Password" });
           } else {
-            console.log("sadsa ====>  ", user);
             const token = jwt.sign(
               {
                 email: email,
@@ -189,12 +186,10 @@ exports.loginUser = (req, res) => {
       } else {
         res
           .status(401)
-          .send({ success: false, message: "Invalid email or password" });
+          .send({ success: false, message: "User not found.Please Signup!!" });
       }
     } else {
-      res
-        .status(500)
-        .send({ success: false, message: "User not found.Please Signup!!" });
+      res.status(500).send({ success: false, message: error.message });
     }
   });
 };
@@ -203,11 +198,9 @@ exports.genToken = (req, res) => {
   const { email } = req.body;
   Users.findOne({ email: email })
     .then((user) => {
-      console.log("forgot user ---->  ", user);
       if (!user) {
         res.status(400).send({ success: false, message: "User not Found" });
       } else {
-        // console.log(user._id);
         const ForgotArray = ["Facebook", "Twitter", "Instagram"];
 
         if (ForgotArray.includes(user.loggedInWith)) {
@@ -221,7 +214,6 @@ exports.genToken = (req, res) => {
             ftoken: token,
           })
             .then((val) => {
-              console.log(val);
               res.status(200).send({ success: true, token: token });
             })
             .catch((err) =>
@@ -249,16 +241,10 @@ exports.forgotPassword = (req, res) => {
       const ftoken = crypto.randomBytes(32).toString("hex");
       user.password = password;
       user.ftoken = ftoken;
-      console.log(user);
 
       user
         .save()
-        // (user._id, {
-        //   password: password,
-        //   ftoken: ftoken,
-        // })
         .then((val) => {
-          console.log(val);
           res.status(200).send({ success: true });
         })
         .catch((err) =>
