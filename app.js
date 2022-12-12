@@ -10,7 +10,13 @@ require("dotenv").config();
 
 var app = express();
 
-app.use(cors());
+const corsOptions = {
+  origin: "*",
+  methods: ["POST", "GET", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 // view engine setup
