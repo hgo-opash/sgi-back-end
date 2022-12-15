@@ -285,10 +285,8 @@ exports.profilepic = (req, res) => {
     profilePic: req.file.filename,
   })
     .then((data) => {
-      // console.log({ success: true, data: data, profilePic: req.file.filename });
-      res
-        .status(200)
-        .send({ success: true, data: data, profilePic: req.file.filename });
+      // console.log({ success: true, data: data , profilePic :req.file.filename});
+      res.status(200).send({ success: true, data: data , profilePic :req.file.filename});
     })
     .catch((err) => {
       res.status(500).send({
