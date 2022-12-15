@@ -61,6 +61,7 @@ exports.getSubscriptions = (req, res) => {
         name: req.user.name,
         lastLoggedInAt: req.user.lastLoggedInAt,
         role: req.user.role,
+        profilePic: req.user.profilePic,
       });
     })
     .catch((err) => {
@@ -100,6 +101,22 @@ exports.deleteSubscription = (req, res) => {
       res.status(200).send({
         success: true,
         message: "successfully deleted.",
+      });
+    })
+    .catch((err) => {
+      res.status(500).send({
+        success: false,
+        message: err.message,
+      });
+    });
+};
+
+exports.deleteAllSubscriptions = (req, res) => {
+  Subscriptions.remove({ userId: req.user.id })
+    .then((data) => {
+      res.status(200).send({
+        success: true,
+        message: "Successfully deleted all subscriptions !!!",
       });
     })
     .catch((err) => {

@@ -76,7 +76,7 @@ exports.fblogin = (req, res) => {
     } else {
       axios
         .get(
-          `https://graph.facebook.com/oauth/access_token?client_id=1490110678165861&client_secret=7ed156d2f1a85aa55f3720f4e82fe56b&grant_type=client_credentials`
+          `https://graph.facebook.com/oauth/access_token?client_id=${process.env.FB_CLIENT_ID}&client_secret=${process.env.FB_CLIENT_SECRET}&grant_type=client_credentials`
         )
         .then(({ data }) => {
           axios
@@ -161,6 +161,7 @@ exports.loginUser = (req, res) => {
                 lastLoggedInAt: new Date(),
                 name: user.firstName,
                 role: user.role,
+                profilePic: user.profilePic,
               },
               process.env.JWT_SECRET_KEY,
               {
@@ -175,6 +176,7 @@ exports.loginUser = (req, res) => {
                 name: user.firstName,
                 lastlogin: val.lastLoggedInAt,
                 role: val.role,
+                profilePic: val.profilePic,
               });
             });
 
@@ -252,4 +254,46 @@ exports.forgotPassword = (req, res) => {
         );
     }
   });
+};
+
+exports.verifyemail = (req, res) => {
+  console.log(req.body.email, "   ", process.env.SENDGRID_API_KEY);
+  const sgMail = require("@sendgrid/mail");
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+  const msg = {
+    to: req.body.email,
+    from: "hitesh.gohil@safalvir.com",
+    subject: "Verificarion for safalvir",
+    text: "This is your verifiction link",
+    html: `<strong>Click here</strong>`,
+  };
+  sgMail
+    .send(msg)
+    .then(() => {
+      console.log("Email sent");
+      res.status(200).send({ success: true, message: "Email sent" });
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(400).send({ success: false, message: error });
+    });
+};
+
+exports.profilepic = (req, res) => {
+  console.log("filename =====>", req.file.filename);
+  Users.findByIdAndUpdate(req.user.id, {
+    profilePic: req.file.filename,
+  })
+    .then((data) => {
+      // console.log({ success: true, data: data, profilePic: req.file.filename });
+      res
+        .status(200)
+        .send({ success: true, data: data, profilePic: req.file.filename });
+    })
+    .catch((err) => {
+      res.status(500).send({
+        success: false,
+        message: err.message,
+      });
+    });
 };
