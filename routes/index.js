@@ -24,14 +24,21 @@ module.exports = (app) => {
   router.post("/profilepic", upload.single("profilepic"), users.profilepic);
 
   router.post("/savesubs", subscription.saveSubscriptionService);
-  router.get("/getsubs", subscription.getSubscriptions);
+  router.get(
+    "/getsubs",
+    Autho.authorization("user"),
+    subscription.getSubscriptions
+  );
   router.post("/deletsub", subscription.deleteSubscription);
-  router.post("/deletall", subscription.deleteAllSubscriptions);
+  // router.post("/deletall", subscription.deleteAllSubscriptions);
   router.post("/editsub", subscription.editSubscription);
 
   // router.get("/getsubs/:email", subscription.getSubscriptions);
-
-  router.post("/savecompany", company.saveCompany);
+  router.post(
+    "/savecompany",
+    Autho.authorization("business"),
+    company.saveCompany
+  );
   router.get("/getcompanies", company.getCompany);
 
   app.use("/", router);

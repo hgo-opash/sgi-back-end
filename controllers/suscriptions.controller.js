@@ -73,15 +73,18 @@ exports.getSubscriptions = (req, res) => {
 };
 
 exports.editSubscription = (req, res) => {
-  const { id, frequency, trialDays, startDate, nextBilling, amount } = req.body;
+  const id = req.body.id;
+  const { frequency, trialDays, contractStartDate, nextBillingDate, amount } =
+    req.body.values;
   Subscriptions.findByIdAndUpdate(id, {
     frequency: frequency,
     trialDays: trialDays,
-    startDate: startDate,
-    nextBilling: nextBilling,
+    startDate: new Date(contractStartDate),
+    nextBilling: new Date(nextBillingDate),
     amount: amount,
   })
     .then((data) => {
+      console.log(data);
       res.status(200).send({
         success: true,
         message: "successfully edited",
@@ -96,7 +99,8 @@ exports.editSubscription = (req, res) => {
 };
 
 exports.deleteSubscription = (req, res) => {
-  Subscriptions.findByIdAndDelete(req.body.id)
+  console.log(req.body);
+  Subscriptions.deleteMany({ _id: req.body })
     .then((data) => {
       res.status(200).send({
         success: true,
@@ -111,18 +115,18 @@ exports.deleteSubscription = (req, res) => {
     });
 };
 
-exports.deleteAllSubscriptions = (req, res) => {
-  Subscriptions.remove({ userId: req.user.id })
-    .then((data) => {
-      res.status(200).send({
-        success: true,
-        message: "Successfully deleted all subscriptions !!!",
-      });
-    })
-    .catch((err) => {
-      res.status(500).send({
-        success: false,
-        message: err.message,
-      });
-    });
-};
+// exports.deleteAllSubscriptions = (req, res) => {
+//   Subscriptions.remove({ userId: req.user.id })
+//     .then((data) => {
+//       res.status(200).send({
+//         success: true,
+//         message: "Successfully deleted all subscriptions !!!",
+//       });
+//     })
+//     .catch((err) => {
+//       res.status(500).send({
+//         success: false,
+//         message: err.message,
+//       });
+//     });
+// };
