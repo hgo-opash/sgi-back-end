@@ -54,14 +54,16 @@ exports.saveSubscriptionService = (req, res) => {
 exports.getSubscriptions = (req, res) => {
   Subscriptions.find({ userId: req.user.id })
     .then((data) => {
-      res.status(200).send({
-        success: true,
-        data: data,
-        email: req.user.email,
-        name: req.user.name,
-        lastLoggedInAt: req.user.lastLoggedInAt,
-        role: req.user.role,
-        profilePic: req.user.profilePic,
+      Users.findById({ _id: req.user.id }).then((val) => {
+        res.status(200).send({
+          success: true,
+          data: data,
+          email: req.user.email,
+          name: req.user.name,
+          lastLoggedInAt: req.user.lastLoggedInAt,
+          role: req.user.role,
+          profilePic: val.profilePic,
+        });
       });
     })
     .catch((err) => {
