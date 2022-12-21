@@ -170,6 +170,7 @@ exports.loginUser = (req, res) => {
             );
 
             Users.findById(user._id).then((val) => {
+              // console.log("this is login pp ==>> ", val.profilePic);
               res.status(200).send({
                 success: true,
                 token: token,
@@ -280,7 +281,8 @@ exports.verifyemail = (req, res) => {
 };
 
 exports.profilepic = (req, res) => {
-  console.log("filename =====>", req.file.filename);
+  console.log("filename =====>", req.user.id);
+
   Users.findByIdAndUpdate(req.user.id, {
     profilePic: req.file.filename,
   })

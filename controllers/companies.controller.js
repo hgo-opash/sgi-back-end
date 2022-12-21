@@ -38,7 +38,7 @@ exports.saveCompany = (req, res) => {
     });
 };
 
-exports.getCompany = (req, res) => {
+exports.getCompanies = (req, res) => {
   Company.find()
     .then((data) => {
       res.status(200).send({ success: true, data: data });

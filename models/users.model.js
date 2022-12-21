@@ -9,6 +9,7 @@ var UsersSchema = mongoose.Schema(
     gender: { type: String },
     email: { type: String, unique: true, required: true },
     password: { type: String },
+    budget: { type: String },
     dateOfBirth: { type: Date },
     phoneNo: { type: Number },
     lastLoggedInAt: { type: Date },

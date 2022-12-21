@@ -14,6 +14,7 @@ exports.saveSubscriptionService = (req, res) => {
     nextBillingDate,
     amount,
     autoRenewal,
+    comments,
     isStandardAlert,
     customizedAlertMessage,
     isEnableAlerts,
@@ -31,6 +32,7 @@ exports.saveSubscriptionService = (req, res) => {
     nextBilling: nextBillingDate,
     amount: +amount,
     autoRenewal: autoRenewal,
+    comments: comments,
     isStandardAlert: isStandardAlert,
     customizedAlertMessage: customizedAlertMessage || "",
     isEnableAlerts: isEnableAlerts || false,
@@ -76,14 +78,23 @@ exports.getSubscriptions = (req, res) => {
 
 exports.editSubscription = (req, res) => {
   const id = req.body.id;
-  const { frequency, trialDays, contractStartDate, nextBillingDate, amount } =
-    req.body.values;
+  const {
+    frequency,
+    trialDays,
+    contractStartDate,
+    nextBillingDate,
+    status,
+    amount,
+    comments,
+  } = req.body.values;
   Subscriptions.findByIdAndUpdate(id, {
     frequency: frequency,
     trialDays: trialDays,
     startDate: new Date(contractStartDate),
     nextBilling: new Date(nextBillingDate),
+    status: status,
     amount: amount,
+    comments: comments,
   })
     .then((data) => {
       console.log(data);

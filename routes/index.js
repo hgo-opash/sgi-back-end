@@ -3,6 +3,7 @@ module.exports = (app) => {
   const users = require("../controllers/users.controller");
   const subscription = require("../controllers/suscriptions.controller");
   const company = require("../controllers/companies.controller");
+  const countries = require("../controllers/countries.controller");
   const Auth = require("../middleware/authentication");
   const Autho = require("../middleware/authorization");
   const { upload } = require("../middleware/upload");
@@ -18,6 +19,8 @@ module.exports = (app) => {
 
   router.post("/forgotpass", users.genToken);
   router.post("/verify/:token", users.forgotPassword);
+
+  router.get("/countries", countries.getCountries);
 
   router.use(Auth.authentication);
 
@@ -39,7 +42,7 @@ module.exports = (app) => {
     Autho.authorization("business"),
     company.saveCompany
   );
-  router.get("/getcompanies", company.getCompany);
+  router.get("/getcompanies", company.getCompanies);
 
   app.use("/", router);
 };
