@@ -112,8 +112,7 @@ exports.editSubscription = (req, res) => {
 };
 
 exports.deleteSubscription = (req, res) => {
-  console.log(req.body);
-  Subscriptions.deleteMany({ _id: req.body })
+  Subscriptions.deleteMany({ _id: req.body.id })
     .then((data) => {
       res.status(200).send({
         success: true,
