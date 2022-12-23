@@ -10,7 +10,7 @@ var Companies = Schema(
       required: true,
     },
     description: { type: String, required: true },
-    addedBy: { type: Schema.Types.ObjectId, ref: "users" },
+    addedBy: { type: String, required: true },
     logo: { type: String, required: true },
     website: { type: String, required: true },
     popular: { type: Boolean, required: true, default: false },

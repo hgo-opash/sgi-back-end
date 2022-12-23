@@ -11,7 +11,6 @@ exports.saveCompany = (req, res) => {
     price,
     description,
     popular,
-    status,
   } = req.body;
 
   const company_details = new Company({
@@ -42,6 +41,44 @@ exports.getCompanies = (req, res) => {
   Company.find()
     .then((data) => {
       res.status(200).send({ success: true, data: data });
+    })
+    .catch((err) => {
+      res.status(500).send({
+        success: false,
+        message: err.message,
+      });
+    });
+};
+
+exports.editCompanies = (req, res) => {
+  const id = req.body.id;
+  const {
+    name,
+    companyType,
+    logo,
+    website,
+    price,
+    description,
+    popular,
+    updatedBy,
+  } = req.body;
+
+  Company.findByIdAndUpdate(id, {
+    name: name,
+    companyType: companyType,
+    logo: logo,
+    website: website,
+    price: price,
+    description: description,
+    popular: popular,
+    updatedBy: updatedBy,
+  })
+    .then((data) => {
+      console.log(data);
+      res.status(200).send({
+        success: true,
+        message: "successfully edited company details !!!",
+      });
     })
     .catch((err) => {
       res.status(500).send({

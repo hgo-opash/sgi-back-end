@@ -26,6 +26,10 @@ module.exports = (app) => {
 
   router.post("/profilepic", upload.single("profilepic"), users.profilepic);
 
+  router.get("/getuser", users.getUser);
+  router.post("/personaldetails", users.editPersonalDetails);
+  router.post("/changepass", users.changePassword);
+
   router.post("/savesubs", subscription.saveSubscriptionService);
   router.get(
     "/getsubs",
@@ -42,7 +46,16 @@ module.exports = (app) => {
     Autho.authorization("business"),
     company.saveCompany
   );
-  router.get("/getcompanies", company.getCompanies);
+  router.get(
+    "/getcompanies",
+    Autho.authorization("business"),
+    company.getCompanies
+  );
+  router.post(
+    "/editcompany",
+    Autho.authorization("business"),
+    company.editCompanies
+  );
 
   app.use("/", router);
 };

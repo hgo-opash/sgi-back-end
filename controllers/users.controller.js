@@ -244,7 +244,6 @@ exports.forgotPassword = (req, res) => {
       const ftoken = crypto.randomBytes(32).toString("hex");
       user.password = password;
       user.ftoken = ftoken;
-
       user
         .save()
         .then((val) => {
@@ -281,8 +280,6 @@ exports.verifyemail = (req, res) => {
 };
 
 exports.profilepic = (req, res) => {
-  console.log("filename =====>", req.user.id);
-
   Users.findByIdAndUpdate(req.user.id, {
     profilePic: req.file.filename,
   })
@@ -298,4 +295,72 @@ exports.profilepic = (req, res) => {
         message: err.message,
       });
     });
+};
+
+exports.editPersonalDetails = (req, res) => {
+  const { firstName, lastName, gender, dateOfBirth, phoneNo } = req.body;
+  Users.findByIdAndUpdate(req.user.id, {
+    firstName: firstName,
+    lastName: lastName,
+    gender: gender,
+    dateOfBirth: new Date(dateOfBirth),
+    phoneNo: phoneNo,
+  })
+    .then((data) => {
+      // console.log({ success: true, data: data, profilePic: req.file.filename });
+      res.status(200).send({ success: true, message: "Details updated!!" });
+    })
+    .catch((err) => {
+      res.status(500).send({
+        success: false,
+        message: err.message,
+      });
+    });
+};
+
+exports.changePassword = (req, res) => {
+  const { newPassword } = req.body;
+  Users.findOne({ _id: req.user.id }).then((user) => {
+    if (!user) {
+      res.status(400).send({
+        success: false,
+        message: "Token is expired please genrate new token.",
+      });
+    } else {
+      user.password = newPassword;
+      user
+        .save()
+        .then((val) => {
+          res.status(200).send({
+            success: true,
+            message: "Password updated successfully!!",
+          });
+        })
+        .catch((err) =>
+          res.status(403).send({ success: false, message: err.message })
+        );
+    }
+  });
+};
+
+exports.getUser = (req, res) => {
+  console.log("HEre ====>  ", req.user);
+
+  Users.findOne({ _id: req.user.id })
+    .then((user) => {
+      if (!user) {
+        res.status(400).send({
+          success: false,
+          message: "Token is expired please genrate new token.",
+        });
+      } else {
+        res.status(200).send({
+          success: true,
+          data: user,
+        });
+      }
+    })
+    .catch((err) =>
+      res.status(403).send({ success: false, message: err.message })
+    );
 };
