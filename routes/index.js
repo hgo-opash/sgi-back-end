@@ -22,39 +22,66 @@ module.exports = (app) => {
 
   router.get("/countries", countries.getCountries);
 
-  router.use(Auth.authentication);
+  // router.use(Auth.authentication);
 
-  router.post("/profilepic", upload.single("profilepic"), users.profilepic);
+  router.post(
+    "/profilepic",
+    Auth.authentication,
+    upload.single("profilepic"),
+    users.profilepic
+  );
 
-  router.get("/getuser", users.getUser);
-  router.post("/personaldetails", users.editPersonalDetails);
-  router.post("/changepass", users.changePassword);
+  router.get("/getuser", Auth.authentication, users.getUser);
+  router.post(
+    "/personaldetails",
+    Auth.authentication,
+    users.editPersonalDetails
+  );
+  router.post("/changepass", Auth.authentication, users.changePassword);
 
-  router.post("/savesubs", subscription.saveSubscriptionService);
+  router.post(
+    "/savesubs",
+    Auth.authentication,
+    subscription.saveSubscriptionService
+  );
   router.get(
     "/getsubs",
+    Auth.authentication,
     Autho.authorization("user"),
     subscription.getSubscriptions
   );
-  router.post("/deletsub", subscription.deleteSubscription);
+  router.post(
+    "/deletsub",
+    Auth.authentication,
+    subscription.deleteSubscription
+  );
   // router.post("/deletall", subscription.deleteAllSubscriptions);
-  router.post("/editsub", subscription.editSubscription);
+  router.post("/editsub", Auth.authentication, subscription.editSubscription);
 
   // router.get("/getsubs/:email", subscription.getSubscriptions);
   router.post(
     "/savecompany",
+    Auth.authentication,
     Autho.authorization("business"),
     company.saveCompany
   );
   router.get(
     "/getcompanies",
-    Autho.authorization("business"),
+    Auth.authentication,
+    Autho.authorization(["user", "business", "admin"]),
     company.getCompanies
   );
   router.post(
     "/editcompany",
+    Auth.authentication,
     Autho.authorization("business"),
     company.editCompanies
+  );
+  router.post(
+    "/subscriptionName",
+    Auth.authentication,
+    Autho.authorization(["business", "admin"]),
+    company.deleteCompanies
   );
 
   app.use("/", router);

@@ -49,6 +49,21 @@ exports.getCompanies = (req, res) => {
       });
     });
 };
+exports.deleteCompanies = (req, res) => {
+  SubscriptionData.deleteMany({ _id: req.body.id })
+    .then((data) => {
+      res.status(200).send({
+        success: true,
+        message: "successfully deleted.",
+      });
+    })
+    .catch((err) => {
+      res.status(500).send({
+        success: false,
+        message: err.message,
+      });
+    });
+};
 
 exports.editCompanies = (req, res) => {
   const id = req.body.id;
