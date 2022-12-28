@@ -8,23 +8,25 @@ var UsersSchema = mongoose.Schema(
     lastName: { type: String, required: true },
     gender: { type: String },
     email: { type: String, unique: true, required: true },
-    password: { type: String },
+    password: { type: String, select: false},
     budget: { type: String },
     dateOfBirth: { type: Date },
     phoneNo: { type: Number },
     lastLoggedInAt: { type: Date },
-    ftoken: { type: String },
+    ftoken: { type: String, select: false },
     role: {
       type: String,
       enum: ["admin", "business", "user"],
       default: "user",
     },
-    fbAccessToken: { type: String },
+    fbAccessToken: { type: String, select: false },
     loggedInWith: {
       type: String,
       enum: ["Instagram", "Facebook", "Twitter", "Email"],
       default: "Email",
     },
+    otp: { type: Number, select: false },
+    registered: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

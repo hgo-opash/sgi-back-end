@@ -3,6 +3,7 @@ const Users = db.users;
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const axios = require("axios");
+const otpGenerator = require("otp-generator");
 
 exports.getData = (req, res) => {
   res.send("sucess");
@@ -138,10 +139,13 @@ exports.fblogin = (req, res) => {
   });
 };
 
-exports.loginUser = (req, res) => {
+exports.loginUser = async (req, res) => {
   const { email, password } = req.body;
-
-  Users.findOne({ email: email }, (error, user) => {
+  // const user = await Users.findOne({ email: email}).select('+password');
+  Users.findOne({ email: email }, {
+    password: 1,  email: 1, role: 1, firstName: 1,
+    profilePic: 1, lastLoggedInAt: 1
+  }, (error, user) => {
     if (!error) {
       if (user) {
         user.comparePassword(password, (matchError, isMatch) => {
@@ -170,14 +174,11 @@ exports.loginUser = (req, res) => {
             );
 
             Users.findById(user._id).then((val) => {
-              // console.log("this is login pp ==>> ", val.profilePic);
+
               res.status(200).send({
                 success: true,
                 token: token,
-                name: user.firstName,
-                lastlogin: val.lastLoggedInAt,
-                role: val.role,
-                profilePic: val.profilePic,
+                data: val
               });
             });
 
@@ -295,6 +296,58 @@ exports.profilepic = (req, res) => {
         message: err.message,
       });
     });
+
+  //---------------- S3 CODE -----------------------------
+
+  // const fs = require("fs");
+  // const AWS = require("aws-sdk");
+  // const config = require("../config");
+
+  // const BUCKET_NAME = config.BUCKET_NAME;
+  // const IAM_USER_KEY = config.IAM_USER_KEY;
+  // const IAM_USER_SECRET = config.IAM_USER_SECRET;
+
+  // const s3bucket = new AWS.S3({
+  //   accessKeyId: IAM_USER_KEY,
+  //   secretAccessKey: IAM_USER_SECRET,
+  // });
+
+  // const s3 = {
+  //   upload: (file, fileName, folder = "documents") => {
+  //     return new Promise((resolve, reject) => {
+  //       try {
+  //         const readStream = fs.createReadStream(file);
+
+  //         const params = {
+  //           Bucket: BUCKET_NAME,
+  //           Key: `${folder}/${fileName}`,
+  //           Body: readStream,
+  //           ACL: "public-read",
+  //         };
+
+  //         s3bucket.upload(params, (err, data) => {
+  //           readStream.destroy();
+  //           fs.unlinkSync(file);
+  //           if (err) {
+  //             reject(err);
+  //           } else {
+  //             resolve(data.Location);
+  //           }
+  //         });
+  //       } catch (error) {
+  //         reject(error);
+  //       }
+  //     });
+  //   },
+  // };
+
+  // s3.upload(`${dir}/${filename}`, filename, subdir || "documents")
+  //         .then((img) => {
+  //           resolve(img);
+  //         })
+  //         .catch((err) => reject(err));
+
+  //---------------- S3 CODE -----------------------------
 };
 
 exports.editPersonalDetails = (req, res) => {
@@ -354,6 +407,8 @@ exports.getUser = (req, res) => {
           message: "Token is expired please genrate new token.",
         });
       } else {
+        delete user.ftoken;
+        delete user.password;
         res.status(200).send({
           success: true,
           data: user,
@@ -363,4 +418,72 @@ exports.getUser = (req, res) => {
     .catch((err) =>
       res.status(403).send({ success: false, message: err.message })
     );
+};
+
+exports.phoneNoVerification = (req, res) => {
+  const {
+    // firstName,
+    // lastName,
+    // gender,
+    // email,
+    // password,
+    // dateOfBirth,
+    phoneno,
+    // role,
+    // registered,
+  } = req.body;
+
+  // const user_details = new Users({
+  //   firstName: firstName,
+  //   lastName: lastName,
+  //   gender: gender,
+  //   email: email,
+  //   password: password,
+  //   dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : "",
+  //   phoneNo: phoneNo,
+  //   role: role,
+  //   registered: registered,
+  // });
+
+  const accountSid = process.env.TWILIO_ACCOUNT_SID;
+  const authToken = process.env.TWILIO_AUTH_TOKEN;
+  const client = require("twilio")(accountSid, authToken);
+
+  var otp = otpGenerator.generate(4, {
+    digits: true,
+    upperCaseAlphabets: false,
+    lowerCaseAlphabets: false,
+    specialChars: false,
+  });
+
+  // user_details
+  //   .save()
+  //   .then((data) => {
+  client.messages
+    .create({
+      body: `Your verification code for SGISave is ${otp}`,
+      from: "+15005550006",
+      to: phoneno,
+    })
+    .then((message) => {
+      res.status(200).send({
+        success: true,
+        data: message,
+      });
+    })
+    .catch((err) => {
+      console.log(message);
+      res.status(200).send({
+        success: true,
+        data: err,
+      });
+    });
+  // })
+  // .catch((err) => {
+  //   res.status(500).send({
+  //     success: false,
+  //     // message: "User already exists Please login to countinue",
+  //     message: err.message,
+  //   });
+  // });
 };

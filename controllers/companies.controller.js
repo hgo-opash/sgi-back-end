@@ -50,7 +50,7 @@ exports.getCompanies = (req, res) => {
     });
 };
 exports.deleteCompanies = (req, res) => {
-  SubscriptionData.deleteMany({ _id: req.body.id })
+  Company.deleteMany({ _id: req.body.id })
     .then((data) => {
       res.status(200).send({
         success: true,
@@ -76,7 +76,7 @@ exports.editCompanies = (req, res) => {
     description,
     popular,
     updatedBy,
-  } = req.body;
+  } = req.body.values;
 
   Company.findByIdAndUpdate(id, {
     name: name,

@@ -20,6 +20,8 @@ module.exports = (app) => {
   router.post("/forgotpass", users.genToken);
   router.post("/verify/:token", users.forgotPassword);
 
+  router.post("/verifyphone", users.phoneNoVerification);
+
   router.get("/countries", countries.getCountries);
 
   // router.use(Auth.authentication);
@@ -78,7 +80,7 @@ module.exports = (app) => {
     company.editCompanies
   );
   router.post(
-    "/subscriptionName",
+    "/deletecompany",
     Auth.authentication,
     Autho.authorization(["business", "admin"]),
     company.deleteCompanies
