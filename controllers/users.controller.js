@@ -4,6 +4,8 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const axios = require("axios");
 const otpGenerator = require("otp-generator");
+const s3 = require("../helpers/s3.helper");
+const path = require("path");
 
 exports.getData = (req, res) => {
   res.send("sucess");
@@ -142,60 +144,68 @@ exports.fblogin = (req, res) => {
 exports.loginUser = async (req, res) => {
   const { email, password } = req.body;
   // const user = await Users.findOne({ email: email}).select('+password');
-  Users.findOne({ email: email }, {
-    password: 1,  email: 1, role: 1, firstName: 1,
-    profilePic: 1, lastLoggedInAt: 1
-  }, (error, user) => {
-    if (!error) {
-      if (user) {
-        user.comparePassword(password, (matchError, isMatch) => {
-          if (matchError) {
-            res
-              .status(401)
-              .send({ success: false, message: "Invalid Email or password" });
-          } else if (!isMatch) {
-            res
-              .status(401)
-              .send({ success: false, message: "Invalid Email or Password" });
-          } else {
-            const token = jwt.sign(
-              {
-                email: email,
-                id: user._id.valueOf(),
-                lastLoggedInAt: new Date(),
-                name: user.firstName,
-                role: user.role,
-                profilePic: user.profilePic,
-              },
-              process.env.JWT_SECRET_KEY,
-              {
-                expiresIn: "1d",
-              }
-            );
+  Users.findOne(
+    { email: email },
+    {
+      password: 1,
+      email: 1,
+      role: 1,
+      firstName: 1,
+      profilePic: 1,
+      lastLoggedInAt: 1,
+    },
+    (error, user) => {
+      if (!error) {
+        if (user) {
+          user.comparePassword(password, (matchError, isMatch) => {
+            if (matchError) {
+              res
+                .status(401)
+                .send({ success: false, message: "Invalid Email or password" });
+            } else if (!isMatch) {
+              res
+                .status(401)
+                .send({ success: false, message: "Invalid Email or Password" });
+            } else {
+              const token = jwt.sign(
+                {
+                  email: email,
+                  id: user._id.valueOf(),
+                  lastLoggedInAt: new Date(),
+                  name: user.firstName,
+                  role: user.role,
+                  profilePic: user.profilePic,
+                },
+                process.env.JWT_SECRET_KEY,
+                {
+                  expiresIn: "1d",
+                }
+              );
 
-            Users.findById(user._id).then((val) => {
-
-              res.status(200).send({
-                success: true,
-                token: token,
-                data: val
+              Users.findById(user._id).then((val) => {
+                res.status(200).send({
+                  success: true,
+                  token: token,
+                  data: val,
+                });
               });
-            });
 
-            Users.findByIdAndUpdate(user._id, {
-              lastLoggedInAt: new Date(),
-            });
-          }
-        });
+              Users.findByIdAndUpdate(user._id, {
+                lastLoggedInAt: new Date(),
+              });
+            }
+          });
+        } else {
+          res.status(401).send({
+            success: false,
+            message: "User not found.Please Signup!!",
+          });
+        }
       } else {
-        res
-          .status(401)
-          .send({ success: false, message: "User not found.Please Signup!!" });
+        res.status(500).send({ success: false, message: error.message });
       }
-    } else {
-      res.status(500).send({ success: false, message: error.message });
     }
-  });
+  );
 };
 
 exports.genToken = (req, res) => {
@@ -271,7 +281,6 @@ exports.verifyemail = (req, res) => {
   sgMail
     .send(msg)
     .then(() => {
-      console.log("Email sent");
       res.status(200).send({ success: true, message: "Email sent" });
     })
     .catch((error) => {
@@ -281,14 +290,24 @@ exports.verifyemail = (req, res) => {
 };
 
 exports.profilepic = (req, res) => {
-  Users.findByIdAndUpdate(req.user.id, {
-    profilePic: req.file.filename,
-  })
-    .then((data) => {
-      // console.log({ success: true, data: data, profilePic: req.file.filename });
-      res
-        .status(200)
-        .send({ success: true, data: data, profilePic: req.file.filename });
+  s3.upload(
+    path.join(__dirname, `../uploads/${req.file.filename}`),
+    req.file.filename,
+    "profile"
+  )
+    .then((img) => {
+      Users.findByIdAndUpdate(req.user.id, {
+        profilePic: img,
+      })
+        .then((data) => {
+          res.status(200).send({ success: true, data: data, profilePic: img });
+        })
+        .catch((err) => {
+          res.status(500).send({
+            success: false,
+            message: err.message,
+          });
+        });
     })
     .catch((err) => {
       res.status(500).send({
@@ -296,58 +315,42 @@ exports.profilepic = (req, res) => {
         message: err.message,
       });
     });
+};
 
-  //---------------- S3 CODE -----------------------------
+exports.attachment = (req, res) => {
+  // res.status(200).send({ success: true, attachment: req.file.filename })
+  s3.upload(
+    path.join(__dirname, `../uploads/${req.file.filename}`),
+    req.file.filename,
+    "attachments"
+  )
+    .then((img) => {
+      Users.findByIdAndUpdate(req.user.id, {
+        attachment: img,
+      })
+        .then((data) => {
+          res.status(200).send({ success: true, data: data, attachment: img });
+        })
+        .catch((err) => {
+          res.status(500).send({
+            success: false,
+            message: err.message,
+          });
+        });
+    })
+    .catch((err) => {
+      res.status(500).send({
+        success: false,
+        message: err.message,
+      });
+    });
+};
 
-  // const fs = require("fs");
-  // const AWS = require("aws-sdk");
-  // const config = require("../config");
-
-  // const BUCKET_NAME = config.BUCKET_NAME;
-  // const IAM_USER_KEY = config.IAM_USER_KEY;
-  // const IAM_USER_SECRET = config.IAM_USER_SECRET;
-
-  // const s3bucket = new AWS.S3({
-  //   accessKeyId: IAM_USER_KEY,
-  //   secretAccessKey: IAM_USER_SECRET,
-  // });
-
-  // const s3 = {
-  //   upload: (file, fileName, folder = "documents") => {
-  //     return new Promise((resolve, reject) => {
-  //       try {
-  //         const readStream = fs.createReadStream(file);
-
-  //         const params = {
-  //           Bucket: BUCKET_NAME,
-  //           Key: `${folder}/${fileName}`,
-  //           Body: readStream,
-  //           ACL: "public-read",
-  //         };
-
-  //         s3bucket.upload(params, (err, data) => {
-  //           readStream.destroy();
-  //           fs.unlinkSync(file);
-  //           if (err) {
-  //             reject(err);
-  //           } else {
-  //             resolve(data.Location);
-  //           }
-  //         });
-  //       } catch (error) {
-  //         reject(error);
-  //       }
-  //     });
-  //   },
-  // };
-
-  // s3.upload(`${dir}/${filename}`, filename, subdir || "documents")
-  //         .then((img) => {
-  //           resolve(img);
-  //         })
-  //         .catch((err) => reject(err));
-
-  //---------------- S3 CODE -----------------------------
+exports.uploadcsv = (req, res) => {
+  res.status(200).send({
+    success: true,
+    data: req.user,
+  });
 };
 
 exports.editPersonalDetails = (req, res) => {
@@ -360,7 +363,6 @@ exports.editPersonalDetails = (req, res) => {
     phoneNo: phoneNo,
   })
     .then((data) => {
-      // console.log({ success: true, data: data, profilePic: req.file.filename });
       res.status(200).send({ success: true, message: "Details updated!!" });
     })
     .catch((err) => {
@@ -397,8 +399,6 @@ exports.changePassword = (req, res) => {
 };
 
 exports.getUser = (req, res) => {
-  console.log("HEre ====>  ", req.user);
-
   Users.findOne({ _id: req.user.id })
     .then((user) => {
       if (!user) {
@@ -472,7 +472,6 @@ exports.phoneNoVerification = (req, res) => {
       });
     })
     .catch((err) => {
-      console.log(message);
       res.status(200).send({
         success: true,
         data: err,

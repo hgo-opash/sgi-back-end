@@ -6,7 +6,7 @@ var Subcriptions = Schema(
     subscriptionName: { type: String, required: true },
     company: {
       type: Schema.Types.ObjectId,
-      ref: "companies",
+      ref: "mas_companies",
     },
     description: { type: String, required: true },
     frequency: {
@@ -29,6 +29,10 @@ var Subcriptions = Schema(
       enum: ["Active", "Inactive"],
       default: "Active",
     },
+    attachment : {type: String},
+    rating : {type:Number , default : 0},
+    isLiked : {type:Number , enum :[0,1,-1] , default: 0 },
+    review : {type : String}
   },
   { timestamps: true }
 );

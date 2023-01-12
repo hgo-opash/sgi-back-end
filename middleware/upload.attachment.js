@@ -17,18 +17,8 @@ const storage = multer.diskStorage({
     cb(null, new Date().getTime() + "-" + slugify(file.originalname));
   },
 });
-const filefilter = (req, file, cb) => {
-  if (
-    file.mimetype === "image/png" ||
-    file.mimetype === "image/jpg" ||
-    file.mimetype === "image/jpeg"
-  ) {
-    cb(null, true);
-  } else {
-    cb(null, false);
-  }
-};
 
-const upload = multer({ storage: storage, fileFilter: filefilter });
 
-module.exports = { upload };
+const uploadAttachment = multer({ storage: storage , limits:  { fileSize: 2 * 1024 * 1024 } });
+
+module.exports = { uploadAttachment };
